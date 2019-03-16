@@ -1,25 +1,27 @@
+// ==========================================================
+// Declaring all global variables
 let playCounter = 0;
-let p1score = 0;
-let p2score = 0;
-let userNamep1;
-let userNamep2;
 let listItems = document.querySelectorAll(".boxCss");
 let resetButton = document.querySelector("#resetButton");
+// ==========================================================
 
 let consoleInform = () => {
   console.log("Loaded!");
-
+  // on DOMContentLoaded, add event listeners to DOM elements
   for (i = 0; i < listItems.length; i++) {
     listItems[i].addEventListener("click", showXorO);
   }
 
   resetButton.addEventListener("click", resetGame);
 
+  // randoms AI or Human starting turn
+
   if (Math.ceil(Math.random() * 100) <= 50) {
     aiTurn();
   }
 };
 
+// function for checking tie condition based on current DOM elements
 let checkTie = () => {
   if (!checkWin("X") && playCounter == 9) {
     return true;
@@ -30,6 +32,7 @@ let checkTie = () => {
   }
 };
 
+// function for checking win condition based on current DOM elements
 let checkWin = symbol => {
   let gettop1 = document.querySelector("#toprow1").innerText;
   let gettop2 = document.querySelector("#toprow2").innerText;
@@ -56,37 +59,7 @@ let checkWin = symbol => {
   }
 };
 
-let playAgain = () => {
-  let p1 = document.querySelector("#p1name").innerText;
-  let p2 = document.querySelector("#p2name").innerText;
-  if (playCounter % 2 == 0) {
-    p2score++;
-    playCounter = 9;
-    document.querySelector("#p2score").innerText = p2score;
-    alert(
-      "Congratulations! " +
-        p2 +
-        ' won!\nPlease click "Reset" button for a rematch!'
-    );
-  } else if (playCounter % 2 !== 0) {
-    p1score++;
-    playCounter = 9;
-    document.querySelector("#p1score").innerText = p1score;
-    alert(
-      "Congratulations! " +
-        p1 +
-        ' won!\nPlease click "Reset" button for a rematch!'
-    );
-  }
-};
-
-let alertWin = playerName => {
-  if (input !== "") {
-    alert("Choose an empty box");
-  }
-  return;
-};
-
+// on click, execute Human turn and input symbol, then pass to AI turn
 let showXorO = function() {
   console.log(`this.innerText: `, this.innerText);
   if (playCounter == 9) {
@@ -116,6 +89,7 @@ let showXorO = function() {
   aiTurn();
 };
 
+// get an instance of current game board, simulated as an array of objects
 let getTestArray = () => {
   let tempArr = [];
   for (let i = 0; i < listItems.length; i++) {
@@ -128,11 +102,16 @@ let getTestArray = () => {
 };
 
 let aiTurn = () => {
+  // executing AI's turn: get an instance of gameboard "testThisArr", pass "testThisArr"
+  // to minimax function to find best move and save it to "bestPostiion".
   let testThisArr = getTestArray();
-  // console.log("testThisArr passing to minimax: ", testThisArr);
   let bestPosition = minimax(testThisArr, "O");
+
+  // set the symbol to DOM based on the best position
   document.querySelector(`#${bestPosition.id}`).innerText = "O";
   playCounter++;
+
+  // check for win or tie
   if (checkWin("O")) {
     alert(`Congratulations! O won! Please click "Reset" button for a rematch!`);
     return;
@@ -143,6 +122,7 @@ let aiTurn = () => {
   }
 };
 
+// function for checking win condition based on minimax gameboard instance simulated with array of objects
 let minimaxCheckWin = (arr, symbol) => {
   if (
     (symbol == arr[0].content &&
@@ -176,6 +156,7 @@ let minimaxCheckWin = (arr, symbol) => {
   }
 };
 
+// function for checking tie condition based on minimax gameboard instance simulated with array of objects
 let minimaxCheckTie = arr => {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i].content == "") {
@@ -188,16 +169,45 @@ let minimaxCheckTie = arr => {
 };
 
 let minimax = (arr, symbol) => {
+  // ===================  part 1  ============================
+  // checking if at this point of gameboard instance, is there
+  // any win or tie conditions met? If condition fulfilled,
+  // straightaway return the score.
+
+  // if no conditions are fulfilled, means there are more moves
+  // to be tested, moving on to part 2
+
   if (minimaxCheckWin(arr, "X")) {
-    return { score: -10 };
+    return {
+      score: -10
+    };
   }
   if (minimaxCheckWin(arr, "O")) {
-    return { score: 10 };
+    return {
+      score: 10
+    };
   }
   if (minimaxCheckTie(arr)) {
-    return { score: 0 };
+    return {
+      score: 0
+    };
   }
 
+  // ===================  part 2  ============================
+  // loop through the available moves and push to an array for
+  // choosing later at part 3
+  //
+  // during each loop, input a spot in the game board
+  // instance and pass this new instance into a 2nd minimax function
+  // to check for another win/tie condition.
+  //
+  // if conditions are met at the 2nd minimax function, return the
+  // score back into this 1st minimax function's "result" variable
+  // and put it inside a temp object.
+  //
+  // Push the object into the array.
+  //
+  // Once loop is finished, move on to part 3
   let availMoves = [];
   for (let i = 0; i < arr.length; i++) {
     if (arr[i].content == "") {
@@ -219,6 +229,23 @@ let minimax = (arr, symbol) => {
     }
   }
 
+  // ===================  part 3  ============================
+  // with the completed "availMoves" array, now we determine
+  // out of all moves, which is the best to make at this current
+  // minimax function
+  //
+  // first we determine who's turn is it by checking the "symbol"
+  // argument. if symbol == "O", this means the one deciding which
+  // is the best move now is the AI. Vice versa if symbol == "X".
+  //
+  // if it's the AI's turn, the highest score will be the best move.
+  // (refer to part 1, (if AI win condition, return score: 10))
+  // if there are a few same scores, minimax will take the first
+  // among all the same scores.
+  //
+  // if it's the Human's turn for this minimax function instance,
+  // human will want to choose the move with the least score.
+  // (refer to part 1, (if Human win condition, return score: -10))
   let bestMove;
   if (symbol == "O") {
     let bestScore = -10000;
@@ -237,9 +264,15 @@ let minimax = (arr, symbol) => {
       }
     }
   }
+  // return the final best move after traversing all moves of this
+  // minimax instance
   return availMoves[bestMove];
 };
 
+// when reset button clicked, resetGame function fired.
+// resets all DOM boxes to empty again
+// resets playCounter back to 0 for reseting tie condition
+// randoms AI or Human starting turn
 let resetGame = () => {
   playCounter = 0;
   for (i = 0; i < listItems.length; i++) {
@@ -249,18 +282,5 @@ let resetGame = () => {
     aiTurn();
   }
 };
-
-// let addName = (input, node) => {
-//   if (userNamep1 == null || userNamep1 == "") {
-//     return;
-//   } else {
-//     document.querySelector(node).innerText = input;
-//   }
-// };
-
+// adding event listener to document, on DOMContentLoaded, execute consoleInform callback function
 document.addEventListener("DOMContentLoaded", consoleInform);
-
-// setTimeout((userNamep1 = prompt("Player 1 name? (X)")), 1000);
-// addName(userNamep1, "#p1name");
-// setTimeout((userNamep2 = prompt("Player 2 name? (O)")), 1000);
-// addName(userNamep2, "#p2name");
