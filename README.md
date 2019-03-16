@@ -23,9 +23,9 @@ Please refer to 'program_flowchart.pdf'.
 > The algorithm will traverse through these branches until each one reaches a terminal state, that is to say there is either a victor or a draw. The terminal states are given positive, negative, or zero rankings for minimax player victory, opponent victory, and draw respectively. Then the algorithm returns those terminal rankings back up the tree choosing to return either the minimum or the maximum value at each depth based on which player’s move it would be at that depth. This enables the player to select the least worst move in any given situation.
 >
 > Lets go through a near end game example:
-
-![alt text](https://cdn-images-1.medium.com/max/1600/1*7GmlTvk-MG-lBKgXhylW-w.jpeg "Image from Resources shown below")
-
+>
+> ![alt text](https://cdn-images-1.medium.com/max/1600/1*7GmlTvk-MG-lBKgXhylW-w.jpeg "Image from Resources shown below")
+>
 > X will be running the minimax algorithm and feeds in the current game state. Lets call this Depth 0. First the algorithm looks at all possible moves and checks if they are terminal. Lets call this set of possible moves Depth 1. In the left branch of Depth 1, X takes the middle square and results in a terminal state with X as the victor. This move returns +10.
 >
 > The next two possible moves are not terminal. So the algorithm will go another level in depth and check the possible counter moves to the depth 1 branches. At Depth 2 of each branch, the algorithm will check all possible moves and rank them if they are terminal. One move is terminal with a victory for player O so that move gets a -10 rank. The other move is non-terminal so the algorithm will go one more level into Depth 3. At Depth 3 X takes the center and wins getting +10 rank.
